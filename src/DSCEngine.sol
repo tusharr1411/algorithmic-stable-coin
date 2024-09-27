@@ -310,6 +310,10 @@ contract DSCEngine is ReentrancyGuard {
         return totalAccountCollateralUSDValue;
     }
 
+    function getAccountCollateralBalance(address user, address collateral) external view returns (uint256) {
+        return s_CollateralDeposited[user][collateral];
+    }
+
     function getUsdValue(address token, uint256 amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.latestRoundData();
@@ -355,7 +359,7 @@ contract DSCEngine is ReentrancyGuard {
         return MIN_HEALTH_FACTOR;
     }
 
-    function getCollateralTokens() external view returns( address[] memory ){
+    function getCollateralTokens() external view returns (address[] memory) {
         return s_collateralTokens;
     }
 }
