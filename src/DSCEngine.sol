@@ -87,6 +87,12 @@ contract DSCEngine is ReentrancyGuard {
     ///////////////////////////////////////////////
     ///              Constructor                ///
     ///////////////////////////////////////////////
+    /**
+     * @param tokenAddresses array of allowed collateral toekns addresses
+     * @param priceFeedAddresses array of pricefeed addresses of collateral tokens
+     * @param dscAddress address of DSC stable coin
+     * @dev length of tokenAddresses and priceFeedAddresses must be same
+     */
     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
         if (tokenAddresses.length != priceFeedAddresses.length) {
             revert DSCEngine__tokenAddressesAndPriceFeedAddressesMustBeSameLength();
