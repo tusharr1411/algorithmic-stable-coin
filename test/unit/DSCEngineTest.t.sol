@@ -4,16 +4,19 @@ pragma solidity ^0.8.24;
 
 import {Test, console} from "forge-std/Test.sol";
 
+import {DecentralizedStableCoin} from "src/DecentralizedStableCoin.sol";
+import {DSCEngine} from "src/DSCEngine.sol";
+
+import {HelperConfig} from "script/HelperConfig.s.sol";
 import {DeployDSC} from "script/DeployDSC.s.sol";
-import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
-import {DSCEngine} from "../../src/DSCEngine.sol";
-import {HelperConfig} from "../../script/HelperConfig.s.sol";
-import {ERC20Mock} from "../mocks/ERC20Mock.sol";
-import {MockFailedTransferFrom} from "../mocks/MockFailedTransferFrom.sol";
-import {MockFailedMintDSC} from "../mocks/MockFailedMintDSC.sol";
-import {MockFailedTransfer} from "../mocks/MockFailedTransfer.sol";
-import {MockMoreDebtDSC} from "../mocks/MockMoreDebtDSC.sol";
+
 import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
+import {MockMoreDebtDSC} from "../mocks/MockMoreDebtDSC.sol";
+import {MockFailedMintDSC} from "../mocks/MockFailedMintDSC.sol";
+
+import {ERC20Mock} from "../mocks/ERC20Mock.sol";
+import {MockFailedTransfer} from "../mocks/MockFailedTransfer.sol";
+import {MockFailedTransferFrom} from "../mocks/MockFailedTransferFrom.sol";
 
 contract DSCEngineTest is Test {
     event CollateralRedeemed(

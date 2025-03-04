@@ -182,7 +182,7 @@ contract DSCEngine is ReentrancyGuard {
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
-    //q I think here is an error of underflow
+    //q I think here is an error of underflow// probably not in solidity 0.8 later
     function burnDSC(uint256 amount) public moreThanZero(amount) {
         _burnDSC(msg.sender, msg.sender, amount);
         _revertIfHealthFactorIsBroken(msg.sender);
@@ -217,7 +217,7 @@ contract DSCEngine is ReentrancyGuard {
             revert DSCEngine__HealthFactorIsOkay();
         }
         //Now we want to burn their "DSC" "debt" and take their collateral
-        uint256 tokenAmountFromDebtCovered = getTokenAmountFromUsd(collateralAddress, debtToCover);
+        uint256 tokenAmountFromDebtCovered = getTokenAmountFromUsd(collateralAddress, debtToCover);// the issue is here that it will be always in 18 decimals
         // And give them 10% bonus
         // We should implement a feature to liquidate in the event the protocol is insolvent and swap extra amount into a treasury
         // (though we are not gonna do it rn)
@@ -274,6 +274,7 @@ contract DSCEngine is ReentrancyGuard {
         if (totalDscMinted == 0) return type(uint256).max;
         uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
         return (collateralAdjustedForThreshold * PRECISION) / totalDscMinted;
+        //info this will be in lesser than expected if any collateral has less than 18 decimals
     }
 
     function _redeemCollateral(
@@ -310,6 +311,14 @@ contract DSCEngine is ReentrancyGuard {
         for (uint256 i = 0; i < s_collateralTokens.length; i++) {
             uint256 userDeposites = s_CollateralDeposited[user][s_collateralTokens[i]];
             if (userDeposites > 0) {
+                //@audit
+                /**
+                 * HIGH getUsdValue will return USD value of collateral token in collateral tokens decimals
+                 *   for example if use deposited 1 WBTC then price will it will be 100Ke18 usd
+                 *   but if he deposited 100K USDT then it's value will be 100Ke6
+                 *   so lesser token decimal will lead to lesser and incorrect value
+                 *   hence getCollateralValue will return always less value of collateral then actual
+                 */
                 totalAccountCollateralUSDValue += getUsdValue(s_collateralTokens[i], userDeposites);
             }
         }
@@ -324,6 +333,7 @@ contract DSCEngine is ReentrancyGuard {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.latestRoundData();
         return ((uint256(price) * ADITIONAL_FEED_PRECISION) * amount) / PRECISION;
+        // so usd value will always be in tokenDecimals instead of fixed 18 decimals
     }
 
     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
@@ -331,6 +341,7 @@ contract DSCEngine is ReentrancyGuard {
         (, int256 price,,,) = priceFeed.latestRoundData();
 
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADITIONAL_FEED_PRECISION);
+        //so returend amount of colateral will be in 18 decimals instead of it's actual decimals... 
     }
 
     function getPriceFeedFromToken(address tokenAddress) public view returns (address) {
