@@ -33,19 +33,14 @@
 
 //     function setUp() external {
 //         DeployDSC deployer = new DeployDSC();
-//         console.log("kjkkk", address(deployer));
 //         (dsc, engine, helperConfig) = deployer.run();
-//         console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
-
 //         (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc, deployerKey) = helperConfig.activeNetworkConfig();
 
 //         console.log(address(engine));
 //         targetContract(address(engine));
-//         console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
-
 //     }
 
-//     function invariant_protocolMustHaveMoreCollateralValueThanTotalDSCSupply() public view {
+//     function invariant_protocolMustHaveMoreCollateralValueThanTotalDSCSupply_() public view {
 //         // get the value of all the collateral in  protocol
 //         // Compare it to all the debt ( DSC)
 
@@ -55,11 +50,9 @@
 
 //         uint256 ethCollateralUSDValue = engine.getUsdValue(weth, ethCollateralInProtocol);
 //         uint256 btcCollateralUSDValue =  engine.getUsdValue(wbtc, btcCollateralInProtocol);
-//         console.log("bbbbbbbbbbb", btcCollateralUSDValue);
 //         uint256 totalUSDValueOfCollaterals = ethCollateralUSDValue + btcCollateralUSDValue;
 
 //         assert( totalDSCSupply <= totalUSDValueOfCollaterals);
-
 //     }
 
 // }

@@ -9,9 +9,9 @@ remappings = ['@chainlink/contracts=lib/chainlink-brownie-contracts/contracts','
 
 
 [invariant] 
-runs = 128
+runs = 1000
 depth = 128 #no. of calls in a single run
-fail_on_revert = false
+fail_on_revert = true
 
 [fuzz]
 runs = 100

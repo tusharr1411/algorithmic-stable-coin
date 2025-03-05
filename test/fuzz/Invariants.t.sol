@@ -36,10 +36,7 @@ contract Invariants is StdInvariant, Test {
 
     function setUp() external {
         DeployDSC deployer = new DeployDSC();
-        console.log("kjkkk", address(deployer));
         (dsc, engine, helperConfig) = deployer.run();
-        console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj");
-
         (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc, deployerKey) = helperConfig.activeNetworkConfig();
 
         console.log(address(engine));
@@ -59,9 +56,20 @@ contract Invariants is StdInvariant, Test {
 
         uint256 ethCollateralUSDValue = engine.getUsdValue(weth, ethCollateralInProtocol);
         uint256 btcCollateralUSDValue = engine.getUsdValue(wbtc, btcCollateralInProtocol);
-        console.log("bbbbbbbbbbb", btcCollateralUSDValue);
         uint256 totalUSDValueOfCollaterals = ethCollateralUSDValue + btcCollateralUSDValue;
 
+        console.log("Weth total deposited", ethCollateralInProtocol);
+        console.log("Wbtc total deposited", btcCollateralInProtocol);
+        console.log("Total supply of DSC", totalDSCSupply);
+        console.log("vvvvvvvvvvvvvvv", handler.varr());
+
         assert(totalDSCSupply <= totalUSDValueOfCollaterals);
+    }
+
+    function invariant_getttersShouldNotRevert() public view {
+        engine.getLiquidationBonus();
+        engine.getLiquidationPrecision();
+        engine.getMinHealthFactor();
+        engine.getCollateralTokens();
     }
 }
