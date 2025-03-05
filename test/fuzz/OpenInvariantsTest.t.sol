@@ -49,10 +49,9 @@ contract OpenInvariantTest is StdInvariant, Test {
         uint256 btcCollateralInProtocol = ERC20Mock(wbtc).balanceOf(address(engine));
 
         uint256 ethCollateralUSDValue = engine.getUsdValue(weth, ethCollateralInProtocol);
-        uint256 btcCollateralUSDValue =  engine.getUsdValue(wbtc, btcCollateralInProtocol);
+        uint256 btcCollateralUSDValue = engine.getUsdValue(wbtc, btcCollateralInProtocol);
         uint256 totalUSDValueOfCollaterals = ethCollateralUSDValue + btcCollateralUSDValue;
 
-        assert( totalDSCSupply <= totalUSDValueOfCollaterals);
+        assert(totalDSCSupply <= totalUSDValueOfCollaterals);
     }
-
 }
