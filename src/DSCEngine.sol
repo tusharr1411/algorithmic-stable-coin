@@ -3,8 +3,9 @@
 pragma solidity ^0.8.24;
 
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
+import {IERC20} from "./interfaces/IERC20.sol";
+import {OracleLib} from "./libraries/OracleLib.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {IERC20} from "src/interfaces/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import {console} from "forge-std/Test.sol";
@@ -35,6 +36,11 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__MintFailed();
     error DSCEngine__HealthFactorIsOkay();
     error DSCEngine__HealthFactorIsNotImproved();
+
+    ///////////////////////////////////////////////
+    ///                 Types                   ///
+    ///////////////////////////////////////////////
+    using OracleLib for AggregatorV3Interface;
 
     ///////////////////////////////////////////////
     ///            State Variables              ///
@@ -325,14 +331,14 @@ contract DSCEngine is ReentrancyGuard {
     //returns value of token in usd with 18 decimals
     function getUsdValue(address token, uint256 amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         return ((uint256(price) * ADITIONAL_FEED_PRECISION) * amount) / uint256(10 ** IERC20(token).decimals());
     }
 
     //returns usd value(in 18 deciamls) to tokenAmount ( in token deciamls)
     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int256 price,,,) = priceFeed.latestRoundData();
+        (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
         return (usdAmountInWei * uint256(10 ** IERC20(token).decimals())) / (uint256(price) * ADITIONAL_FEED_PRECISION);
     }
 
