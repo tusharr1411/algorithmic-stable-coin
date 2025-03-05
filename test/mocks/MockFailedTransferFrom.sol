@@ -7,7 +7,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract MockFailedTransferFrom is ERC20Burnable, Ownable {
     error MockFailedTransferFrom__AmountMustBeMoreThanZero();
     error MockFailedTransferFrom__BurnAmountExceedsBalance();
-    error MockFailedTransferFrom__NotZeroAddress();
+    error MockFailedTransferFrom__CanNotBeZeroAddress();
 
     /*
     In future versions of OpenZeppelin contracts package, Ownable must be declared with an address of the contract owner
@@ -30,8 +30,11 @@ contract MockFailedTransferFrom is ERC20Burnable, Ownable {
         super.burn(_amount);
     }
 
-    function mint(address account, uint256 amount) public {
-        _mint(account, amount);
+    function mint(address _to, uint256 _amount) external onlyOwner returns (bool) {
+        if (_to == address(0)) revert MockFailedTransferFrom__CanNotBeZeroAddress();
+        if (_amount <= 0) revert MockFailedTransferFrom__AmountMustBeMoreThanZero();
+        _mint(_to, _amount);
+        return true;
     }
 
     function transferFrom(address, /*sender*/ address, /*recipient*/ uint256 /*amount*/ )
