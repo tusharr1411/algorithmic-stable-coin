@@ -83,7 +83,6 @@ contract DSCEngineTest is Test {
     function test_getUsdValue() public view {
         uint256 btcAmount = 2e8;
         uint256 expectedValue = btcAmount * currentBtcPrice * 1e18 / (WBTC_PRECISION * PRICEFEED_PRECISION);
-        //                                                   / wbtc decimals * priceFeedDecimals
         uint256 actualValue = engine.getUsdValue(wbtc, btcAmount);
         console.log("expected value :", expectedValue);
         console.log("actual value :", actualValue);
