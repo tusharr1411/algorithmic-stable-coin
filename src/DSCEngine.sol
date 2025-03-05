@@ -182,10 +182,12 @@ contract DSCEngine is ReentrancyGuard {
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
-    //q I think here is an error of underflow
     function burnDSC(uint256 amount) public moreThanZero(amount) {
+        uint256 startingUserHealthFactor = _healthFactor(msg.sender);
         _burnDSC(msg.sender, msg.sender, amount);
-        _revertIfHealthFactorIsBroken(msg.sender);
+        uint256 endingUserHealthFactor = _healthFactor(msg.sender);
+        if (endingUserHealthFactor <= startingUserHealthFactor) revert DSCEngine__HealthFactorIsNotImproved(); // being extra safe
+            // _revertIfHealthFactorIsBroken(msg.sender); // this does not allow liquidatable account to partially burn some DSC
     }
 
     // $100 ETH backing $50 DSC
