@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.24;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test, console, console2} from "forge-std/Test.sol";
 
 import {DeployDSC} from "script/DeployDSC.s.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
@@ -44,10 +44,20 @@ contract DSCEngineTest is Test {
     uint256 public constant MINT_DSC_AMOUNT = 100e18; // 100 USD
     uint256 public constant COLLATERAL_TO_COVER = 20 ether;
 
+    uint256 constant WBTC_PRECISION = 1e8;
+    uint256 constant WETH_PRECISION = 1e18;
+    uint256 constant PRICEFEED_PRECISION = 1e8;
+    uint256 public currentEthPrice;
+    uint256 public currentBtcPrice;
+
     function setUp() public {
         deployer = new DeployDSC();
         (dsc, engine, helperConfig) = deployer.run();
         (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc, deployerKey) = helperConfig.activeNetworkConfig();
+        (, int256 ethPrice,,,) = MockV3Aggregator(ethUsdPriceFeed).latestRoundData();
+        currentEthPrice = uint256(ethPrice);
+        (, int256 btcPrice,,,) = MockV3Aggregator(btcUsdPriceFeed).latestRoundData();
+        currentBtcPrice = uint256(btcPrice);
         ERC20Mock(weth).mint(USER, STARTING_ERC20_BALANCE); // 100 weth
         ERC20Mock(wbtc).mint(USER, STARTING_ERC20_BALANCE); // 100 wbtc
 
@@ -70,20 +80,22 @@ contract DSCEngineTest is Test {
     //////////////////////////////////////////////
     ///          View Function Tests           ///
     //////////////////////////////////////////////
-    function test_GetUsdValue() public view {
-        uint256 ethAmount = 2;
-        uint256 expectedValue = 2 * 2400;
-        uint256 actualValue = engine.getUsdValue(weth, ethAmount);
-        console.log("Value in USD: %d", actualValue);
+    function test_getUsdValue() public view {
+        uint256 btcAmount = 2e8;
+        uint256 expectedValue = btcAmount * currentBtcPrice * 1e18 / (WBTC_PRECISION * PRICEFEED_PRECISION);
+        //                                                   / wbtc decimals * priceFeedDecimals
+        uint256 actualValue = engine.getUsdValue(wbtc, btcAmount);
+        console.log("expected value :", expectedValue);
+        console.log("actual value :", actualValue);
         assert(expectedValue == actualValue);
     }
 
     function test_getTokenAmountFromUsd() public view {
-        uint256 usdAmount = 2400 * 1e18;
-        uint256 expectedValue = (2400 * 1e18) / 2400;
-        uint256 actualValue = engine.getTokenAmountFromUsd(weth, usdAmount);
+        uint256 usdAmount = 80_000 * 1e18;
+        uint256 expectedBtc = usdAmount * WBTC_PRECISION * PRICEFEED_PRECISION / (currentBtcPrice * 1e18);
+        uint256 actualValue = engine.getTokenAmountFromUsd(wbtc, usdAmount);
         console.log("Value in ETH: %d", actualValue);
-        assert(expectedValue == actualValue);
+        assert(expectedBtc == actualValue);
     }
 
     function test_getAccountCollateralValue() public view {}

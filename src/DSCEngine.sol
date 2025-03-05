@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 
 import {DecentralizedStableCoin} from "./DecentralizedStableCoin.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "src/interfaces/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import {console} from "forge-std/Test.sol";
@@ -320,17 +320,18 @@ contract DSCEngine is ReentrancyGuard {
         return s_CollateralDeposited[user][collateral];
     }
 
+    //returns value of token in usd with 18 decimals
     function getUsdValue(address token, uint256 amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.latestRoundData();
-        return ((uint256(price) * ADITIONAL_FEED_PRECISION) * amount) / PRECISION;
+        return ((uint256(price) * ADITIONAL_FEED_PRECISION) * amount) / uint256(10 ** IERC20(token).decimals());
     }
 
+    //returns usd value(in 18 deciamls) to tokenAmount ( in token deciamls)
     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.latestRoundData();
-
-        return (usdAmountInWei * PRECISION) / (uint256(price) * ADITIONAL_FEED_PRECISION);
+        return (usdAmountInWei * uint256(10 ** IERC20(token).decimals())) / (uint256(price) * ADITIONAL_FEED_PRECISION);
     }
 
     function getPriceFeedFromToken(address tokenAddress) public view returns (address) {
